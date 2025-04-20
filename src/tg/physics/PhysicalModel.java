@@ -3,6 +3,7 @@ package src.tg.physics;
 
 import src.tg.helper.DoubleVector;
 import src.tg.helper.Position;
+import src.tg.local.vo.dynamics.Planet;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -64,6 +65,45 @@ public class PhysicalModel implements Serializable {
 
     }
 
+    public void calcNewLocationGravity(Position pos, PhysicalVariables phyVar) {
+        DoubleVector gravAccel = new DoubleVector(0, 0);
+
+        double G = 6e-6;
+
+        DoubleVector objectPos = new DoubleVector(pos);
+
+        for (Planet planet : Planet.getAllPlanets()) {
+            DoubleVector planetPos = planet.getPosition();
+
+            double dx = planetPos.getX() - objectPos.getX();
+            double dy = planetPos.getY() - objectPos.getY();
+            double r2 = dx * dx + dy * dy;
+            double distance = Math.sqrt(r2);
+
+            if (distance < 1) distance = 1;
+
+            double forceMagnitude = G * planet.getMass() / (distance * distance);
+
+            double ax = forceMagnitude * dx / distance;
+            double ay = forceMagnitude * dy / distance;
+
+            gravAccel.setXY(gravAccel.getX() + ax, gravAccel.getY() + ay);
+        }
+
+        phyVar.acceleration.set(gravAccel);
+
+        long nowMillis = currentTimeMillis();
+        long elapsedMillis = nowMillis - pos.getPositionMillis();
+
+        DoubleVector offset = this.calcOffset(phyVar.speed, elapsedMillis);
+        Position newPos = new Position(pos);
+        newPos.add(offset);
+        newPos.setPositionMillis(nowMillis);
+
+        pos.clone(newPos);
+        DoubleVector speed = this.calcSpeed(phyVar.acceleration, phyVar.speed, elapsedMillis);
+        phyVar.cloneSpeed(speed);
+    }
 
     public DoubleVector calcOffset(DoubleVector speed, float elapsedMillis) {
         DoubleVector offset = new DoubleVector();
