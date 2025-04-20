@@ -71,7 +71,7 @@ public class PhysicalModel implements Serializable {
         phyVar.cloneSpeed(this.phyVariables.speed);
         phyVar.cloneAcceleration(this.phyVariables.acceleration);
 
-        double G = 6e-6;
+        double G = 6e-11;
 
         DoubleVector objectPos = new DoubleVector(pos);
 

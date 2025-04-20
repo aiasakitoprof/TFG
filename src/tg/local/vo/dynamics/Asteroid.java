@@ -26,7 +26,7 @@ public class Asteroid extends VOD implements Serializable {
         this.explosionType = this.calculateExplosionType(asteroidNumber);
 
         double minSpeed = 0.1;
-        double maxSpeed = 0.5;
+        double maxSpeed = 0.2;
 
         Random rand = new Random();
         double angle = rand.nextDouble() * 2 * Math.PI; // 0 ... 2π radians
