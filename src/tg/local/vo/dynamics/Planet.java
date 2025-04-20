@@ -11,7 +11,9 @@ import src.tg.local.vo.VOState;
 
 import java.awt.*;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class Planet extends VO implements Serializable {
@@ -19,7 +21,8 @@ public class Planet extends VO implements Serializable {
     public static boolean debugMode = true;
     long impacts;
     long cracks;
-
+    private double mass;
+    private static final List<Planet> allPlanets = new CopyOnWriteArrayList<>();
 
     /**
      * CONSTRUCTORS
@@ -28,11 +31,20 @@ public class Planet extends VO implements Serializable {
      * @param scale
      * @param coordinates
      */
-    public Planet(int imageNumber, double scale, DoubleVector coordinates) {
+    public Planet(int imageNumber, double scale, DoubleVector coordinates, double mass) {
         super(Images.getPlanet(imageNumber), scale, coordinates);
         this.impacts = 0;
+        this.mass = mass;
+        allPlanets.add(this);
     }
 
+    public double getMass() {
+        return this.mass;
+    }
+
+    public static List<Planet> getAllPlanets() {
+        return allPlanets;
+    }
 
     /**
      * PUBLICS
