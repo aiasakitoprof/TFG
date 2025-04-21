@@ -42,7 +42,7 @@ public class LCT {
     /**
      * ONLY PACKAGE
      */
-    ArrayList<VO> getVOList() {
+    public ArrayList<VO> getVOList() {
         return this.localModel.getVOList();
     }
 

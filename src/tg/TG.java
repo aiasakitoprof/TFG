@@ -10,6 +10,7 @@ import src.tg.images.Images;
 import src.tg.local.vo.VO;
 import src.tg.local.vo.dynamics.Planet;
 import src.tg.local.vo.dynamics.Ship;
+import src.tg.local.vo.VOState;
 import src.tg.peer.PCT;
 
 import java.util.Random;
@@ -42,8 +43,9 @@ public class TG {
         this.vodGenerator.activate();
         this.addPlanets();
 
-        Ship ship = new Ship(new DoubleVector(720, 340));
+        Ship ship = new Ship(new DoubleVector(100, 100));
         this.peerController.addVisualObject(ship);
+        setupRespawnKey();
     }
 
     /**
@@ -117,6 +119,25 @@ public class TG {
      */
     public void addVisualObject(VO vo) {
         this.peerController.addVisualObject(vo);
+    }
+
+    private void setupRespawnKey() {
+        java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
+            if (e.getID() == java.awt.event.KeyEvent.KEY_PRESSED && e.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE) {
+                boolean aliveShipExists = false;
+                for (VO vo : this.peerController.getVisualObjects()) {
+                    if (vo instanceof Ship s && s.getState() == src.tg.local.vo.VOState.ALIVE) {
+                        aliveShipExists = true;
+                        break;
+                    }
+                }
+                if (!aliveShipExists) {
+                    Ship newShip = new Ship(new DoubleVector(100, 100)); // Or wherever you want to spawn
+                    this.peerController.addVisualObject(newShip);
+                }
+            }
+            return false;
+        });
     }
 
 }

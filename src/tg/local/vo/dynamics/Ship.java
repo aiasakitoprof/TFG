@@ -126,6 +126,21 @@ public void run() {
                 phyVars.speed.scale(0.85);
             }
 
+// --- Planet collision detection ---
+for (Planet planet : Planet.getAllPlanets()) {
+    double dx = planet.getPosition().getX() - pos.getX();
+    double dy = planet.getPosition().getY() - pos.getY();
+    double distance = Math.sqrt(dx*dx + dy*dy);
+
+    // Assuming Planet's displayed radius (approximate) is:
+    double planetRadius = planet.getMainImage().getScaledImageDimension().getModule() / 2.0;
+    double shipRadius = SIZE / 2.0;
+
+    if (distance < planetRadius + shipRadius) {
+        this.setState(src.tg.local.vo.VOState.DEAD); // or call die()
+        break;
+    }
+}
             this.getLocalModel().collisionDetection(this);
         }
 

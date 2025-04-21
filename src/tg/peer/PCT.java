@@ -64,6 +64,10 @@ public class PCT implements Runnable, ReceivedObjectsManager {
         this.localController.addVisualObject(vo);
     }
 
+    public ArrayList<VO> getVisualObjects() {
+        return this.localController.getVOList();
+    }
+
     /**
      * PRIVATES
      */
