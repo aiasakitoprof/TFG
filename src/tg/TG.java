@@ -9,6 +9,7 @@ import src.tg.helper.DoubleVector;
 import src.tg.images.Images;
 import src.tg.local.vo.VO;
 import src.tg.local.vo.dynamics.Planet;
+import src.tg.local.vo.dynamics.Ship;
 import src.tg.peer.PCT;
 
 import java.util.Random;
@@ -40,6 +41,9 @@ public class TG {
         this.vodGenerator = new AsteroidGenerator(this);
         this.vodGenerator.activate();
         this.addPlanets();
+
+        Ship ship = new Ship(new DoubleVector(100, 100));
+        this.peerController.addVisualObject(ship);
     }
 
     /**
