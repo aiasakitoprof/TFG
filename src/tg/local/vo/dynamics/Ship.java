@@ -15,10 +15,13 @@ public class Ship extends VOD {
     private static final int SIZE = 20;
     private static final double ACCELERATION = 0.0005;
     private static final double ROTATION_SPEED = 0.22;
-    private static final double MAX_SPEED = 1;
+    private static final double MAX_SPEED = 0.5;
 
     private volatile boolean up, down, left, right;
     private volatile double angle = 270;
+
+    private final int windowWidth = 1300;
+    private final int windowHeight = 700;
 
     public Ship(DoubleVector startPos) {
         this.getPosition().setXY(startPos.getX(), startPos.getY());
@@ -42,64 +45,95 @@ public class Ship extends VOD {
         });
     }
 
-    @Override
-    public void run() {
-        PhysicalVariables phyVars = this.getPhysicalModel().phyVariables;
-        Position pos = this.getPosition();
+@Override
+public void run() {
+    PhysicalVariables phyVars = this.getPhysicalModel().phyVariables;
+    Position pos = this.getPosition();
 
-        long prevMillis = System.currentTimeMillis();
+    long prevMillis = System.currentTimeMillis();
 
-        while (this.getState() != src.tg.local.vo.VOState.DEAD) {
-            if (this.getState() == src.tg.local.vo.VOState.ALIVE) {
-                long nowMillis = System.currentTimeMillis();
-                long elapsed = nowMillis - prevMillis;
-                prevMillis = nowMillis;
+    while (this.getState() != src.tg.local.vo.VOState.DEAD) {
+        if (this.getState() == src.tg.local.vo.VOState.ALIVE) {
+            long nowMillis = System.currentTimeMillis();
+            long elapsed = nowMillis - prevMillis;
+            prevMillis = nowMillis;
 
-                if (left) angle -= ROTATION_SPEED * elapsed;
-                if (right) angle += ROTATION_SPEED * elapsed;
+            if (left) angle -= ROTATION_SPEED * elapsed;
+            if (right) angle += ROTATION_SPEED * elapsed;
 
-                DoubleVector acc = new DoubleVector(0, 0);
-                if (up) {
-                    acc.setXY(
-                        Math.cos(Math.toRadians(angle)),
-                        Math.sin(Math.toRadians(angle))
-                    );
-                    acc.scale(ACCELERATION);
-                }
-                if (down) {
-                    acc.setXY(
-                        Math.cos(Math.toRadians(angle + 180)),
-                        Math.sin(Math.toRadians(angle + 180))
-                    );
-                    acc.scale(ACCELERATION);
-                }
-
-                DoubleVector speed = new DoubleVector(phyVars.speed);
-                DoubleVector speedIncrement = new DoubleVector(acc);
-                speedIncrement.scale(elapsed);
-                speed.add(speedIncrement);
-
-                if (speed.getModule() > MAX_SPEED) {
-                    double scale = MAX_SPEED / speed.getModule();
-                    speed.scale(scale);
-                }
-
-                phyVars.speed.set(speed);
-                phyVars.acceleration.set(acc);
-
-                DoubleVector offset = new DoubleVector(speed);
-                offset.scale(elapsed);
-                pos.add(offset);
-                pos.setPositionMillis(nowMillis);
-
-                this.getLocalModel().collisionDetection(this);
+            DoubleVector acc = new DoubleVector(0, 0);
+            if (up) {
+                acc.setXY(
+                    Math.cos(Math.toRadians(angle)),
+                    Math.sin(Math.toRadians(angle))
+                );
+                acc.scale(ACCELERATION);
+            }
+            if (down) {
+                acc.setXY(
+                    Math.cos(Math.toRadians(angle + 180)),
+                    Math.sin(Math.toRadians(angle + 180))
+                );
+                acc.scale(ACCELERATION);
             }
 
-            try {
-                Thread.sleep(16);
-            } catch (InterruptedException ignore) {}
+            DoubleVector speed = new DoubleVector(phyVars.speed);
+            DoubleVector speedIncrement = new DoubleVector(acc);
+            speedIncrement.scale(elapsed);
+            speed.add(speedIncrement);
+
+            if (speed.getModule() > MAX_SPEED) {
+                double scale = MAX_SPEED / speed.getModule();
+                speed.scale(scale);
+            }
+
+            phyVars.speed.set(speed);
+            phyVars.acceleration.set(acc);
+
+            DoubleVector offset = new DoubleVector(speed);
+            offset.scale(elapsed);
+            pos.add(offset);
+            pos.setPositionMillis(nowMillis);
+
+            double x = pos.getX();
+            double y = pos.getY();
+            double halfSize = SIZE / 2.0;
+
+            boolean bounced = false;
+
+            if (x - halfSize < 0) {
+                pos.setX(halfSize);
+                phyVars.speed.setX(-phyVars.speed.getX());
+                bounced = true;
+            }
+            if (x + halfSize > windowWidth) {
+                pos.setX(windowWidth - halfSize);
+                phyVars.speed.setX(-phyVars.speed.getX());
+                bounced = true;
+            }
+            if (y - halfSize < 0) {
+                pos.setY(halfSize);
+                phyVars.speed.setY(-phyVars.speed.getY());
+                bounced = true;
+            }
+            if (y + halfSize > windowHeight) {
+                pos.setY(windowHeight - halfSize);
+                phyVars.speed.setY(-phyVars.speed.getY());
+                bounced = true;
+            }
+
+            if (bounced) {
+                phyVars.speed.scale(0.85);
+            }
+
+            this.getLocalModel().collisionDetection(this);
         }
+
+        try {
+            Thread.sleep(16);
+        } catch (InterruptedException ignore) {}
     }
+}
 
     @Override
     public void paint(Graphics gr) {
