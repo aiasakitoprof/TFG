@@ -42,7 +42,7 @@ public class TG {
         this.vodGenerator.activate();
         this.addPlanets();
 
-        Ship ship = new Ship(new DoubleVector(100, 100));
+        Ship ship = new Ship(new DoubleVector(720, 340));
         this.peerController.addVisualObject(ship);
     }
 
