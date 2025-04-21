@@ -150,29 +150,32 @@ for (Planet planet : Planet.getAllPlanets()) {
     }
 }
 
-    @Override
-    public void paint(Graphics gr) {
-        super.paint(gr);
-
-        Graphics2D g2 = (Graphics2D) gr.create();
-        int x = (int) (getPosition().getX());
-        int y = (int) (getPosition().getY());
-
-        Polygon shipShape = new Polygon();
-        double r = SIZE / 2.0;
-
-        for (int i = 0; i < 3; ++i) {
-            double theta = Math.toRadians(angle + (i == 0 ? 0 : (i == 1 ? 135 : -135)));
-            int px = x + (int) (r * Math.cos(theta));
-            int py = y + (int) (r * Math.sin(theta));
-            shipShape.addPoint(px, py);
-        }
-
-        g2.setColor(Color.WHITE);
-        g2.fillPolygon(shipShape);
-        g2.setColor(Color.BLACK);
-        g2.drawPolygon(shipShape);
-
-        g2.dispose();
+@Override
+public void paint(Graphics gr) {
+    if (getState() == src.tg.local.vo.VOState.DEAD) {
+        return; // Don't paint if the ship is dead
     }
+    super.paint(gr);
+
+    Graphics2D g2 = (Graphics2D) gr.create();
+    int x = (int) (getPosition().getX());
+    int y = (int) (getPosition().getY());
+
+    Polygon shipShape = new Polygon();
+    double r = SIZE / 2.0;
+
+    for (int i = 0; i < 3; ++i) {
+        double theta = Math.toRadians(angle + (i == 0 ? 0 : (i == 1 ? 135 : -135)));
+        int px = x + (int) (r * Math.cos(theta));
+        int py = y + (int) (r * Math.sin(theta));
+        shipShape.addPoint(px, py);
+    }
+
+    g2.setColor(Color.WHITE);
+    g2.fillPolygon(shipShape);
+    g2.setColor(Color.BLACK);
+    g2.drawPolygon(shipShape);
+
+    g2.dispose();
+}
 }
