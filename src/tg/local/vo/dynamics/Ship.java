@@ -5,10 +5,9 @@ import src.tg.helper.Position;
 import src.tg.local.vo.VOD;
 import src.tg.physics.PhysicalVariables;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.KeyboardFocusManager;
-import javax.swing.SwingUtilities;
 
 public class Ship extends VOD {
 
@@ -45,137 +44,136 @@ public class Ship extends VOD {
         });
     }
 
-@Override
-public void run() {
-    PhysicalVariables phyVars = this.getPhysicalModel().phyVariables;
-    Position pos = this.getPosition();
+    @Override
+    public void run() {
+        PhysicalVariables phyVars = this.getPhysicalModel().phyVariables;
+        Position pos = this.getPosition();
 
-    long prevMillis = System.currentTimeMillis();
+        long prevMillis = System.currentTimeMillis();
 
-    while (this.getState() != src.tg.local.vo.VOState.DEAD) {
-        if (this.getState() == src.tg.local.vo.VOState.ALIVE) {
-            long nowMillis = System.currentTimeMillis();
-            long elapsed = nowMillis - prevMillis;
-            prevMillis = nowMillis;
+        while (this.getState() != src.tg.local.vo.VOState.DEAD) {
+            if (this.getState() == src.tg.local.vo.VOState.ALIVE) {
+                long nowMillis = System.currentTimeMillis();
+                long elapsed = nowMillis - prevMillis;
+                prevMillis = nowMillis;
 
-            if (left) angle -= ROTATION_SPEED * elapsed;
-            if (right) angle += ROTATION_SPEED * elapsed;
+                if (left) angle -= ROTATION_SPEED * elapsed;
+                if (right) angle += ROTATION_SPEED * elapsed;
 
-            DoubleVector acc = new DoubleVector(0, 0);
-            if (up) {
-                acc.setXY(
-                    Math.cos(Math.toRadians(angle)),
-                    Math.sin(Math.toRadians(angle))
-                );
-                acc.scale(ACCELERATION);
+                DoubleVector acc = new DoubleVector(0, 0);
+                if (up) {
+                    acc.setXY(
+                            Math.cos(Math.toRadians(angle)),
+                            Math.sin(Math.toRadians(angle))
+                    );
+                    acc.scale(ACCELERATION);
+                }
+                if (down) {
+                    acc.setXY(
+                            Math.cos(Math.toRadians(angle + 180)),
+                            Math.sin(Math.toRadians(angle + 180))
+                    );
+                    acc.scale(ACCELERATION);
+                }
+
+                DoubleVector speed = new DoubleVector(phyVars.speed);
+                DoubleVector speedIncrement = new DoubleVector(acc);
+                speedIncrement.scale(elapsed);
+                speed.add(speedIncrement);
+
+                if (speed.getModule() > MAX_SPEED) {
+                    double scale = MAX_SPEED / speed.getModule();
+                    speed.scale(scale);
+                }
+
+                phyVars.speed.set(speed);
+                phyVars.acceleration.set(acc);
+
+                DoubleVector offset = new DoubleVector(speed);
+                offset.scale(elapsed);
+                pos.add(offset);
+                pos.setPositionMillis(nowMillis);
+
+                double x = pos.getX();
+                double y = pos.getY();
+                double halfSize = SIZE / 2.0;
+
+                boolean bounced = false;
+
+                if (x - halfSize < 0) {
+                    pos.setX(halfSize);
+                    phyVars.speed.setX(-phyVars.speed.getX());
+                    bounced = true;
+                }
+                if (x + halfSize > windowWidth) {
+                    pos.setX(windowWidth - halfSize);
+                    phyVars.speed.setX(-phyVars.speed.getX());
+                    bounced = true;
+                }
+                if (y - halfSize < 0) {
+                    pos.setY(halfSize);
+                    phyVars.speed.setY(-phyVars.speed.getY());
+                    bounced = true;
+                }
+                if (y + halfSize > windowHeight) {
+                    pos.setY(windowHeight - halfSize);
+                    phyVars.speed.setY(-phyVars.speed.getY());
+                    bounced = true;
+                }
+
+                if (bounced) {
+                    phyVars.speed.scale(0.85);
+                }
+
+                for (Planet planet : Planet.getAllPlanets()) {
+                    double dx = planet.getPosition().getX() - pos.getX();
+                    double dy = planet.getPosition().getY() - pos.getY();
+                    double distance = Math.sqrt(dx * dx + dy * dy);
+
+                    double planetRadius = planet.getMainImage().getScaledImageDimension().getModule() / 2.0;
+                    double shipRadius = SIZE / 2.0;
+
+                    if (distance < planetRadius + shipRadius) {
+                        this.setState(src.tg.local.vo.VOState.DEAD);
+                        break;
+                    }
+                }
+                this.getLocalModel().collisionDetection(this);
             }
-            if (down) {
-                acc.setXY(
-                    Math.cos(Math.toRadians(angle + 180)),
-                    Math.sin(Math.toRadians(angle + 180))
-                );
-                acc.scale(ACCELERATION);
+
+            try {
+                Thread.sleep(16);
+            } catch (InterruptedException ignore) {
             }
-
-            DoubleVector speed = new DoubleVector(phyVars.speed);
-            DoubleVector speedIncrement = new DoubleVector(acc);
-            speedIncrement.scale(elapsed);
-            speed.add(speedIncrement);
-
-            if (speed.getModule() > MAX_SPEED) {
-                double scale = MAX_SPEED / speed.getModule();
-                speed.scale(scale);
-            }
-
-            phyVars.speed.set(speed);
-            phyVars.acceleration.set(acc);
-
-            DoubleVector offset = new DoubleVector(speed);
-            offset.scale(elapsed);
-            pos.add(offset);
-            pos.setPositionMillis(nowMillis);
-
-            double x = pos.getX();
-            double y = pos.getY();
-            double halfSize = SIZE / 2.0;
-
-            boolean bounced = false;
-
-            if (x - halfSize < 0) {
-                pos.setX(halfSize);
-                phyVars.speed.setX(-phyVars.speed.getX());
-                bounced = true;
-            }
-            if (x + halfSize > windowWidth) {
-                pos.setX(windowWidth - halfSize);
-                phyVars.speed.setX(-phyVars.speed.getX());
-                bounced = true;
-            }
-            if (y - halfSize < 0) {
-                pos.setY(halfSize);
-                phyVars.speed.setY(-phyVars.speed.getY());
-                bounced = true;
-            }
-            if (y + halfSize > windowHeight) {
-                pos.setY(windowHeight - halfSize);
-                phyVars.speed.setY(-phyVars.speed.getY());
-                bounced = true;
-            }
-
-            if (bounced) {
-                phyVars.speed.scale(0.85);
-            }
-
-// --- Planet collision detection ---
-for (Planet planet : Planet.getAllPlanets()) {
-    double dx = planet.getPosition().getX() - pos.getX();
-    double dy = planet.getPosition().getY() - pos.getY();
-    double distance = Math.sqrt(dx*dx + dy*dy);
-
-    // Assuming Planet's displayed radius (approximate) is:
-    double planetRadius = planet.getMainImage().getScaledImageDimension().getModule() / 2.0;
-    double shipRadius = SIZE / 2.0;
-
-    if (distance < planetRadius + shipRadius) {
-        this.setState(src.tg.local.vo.VOState.DEAD); // or call die()
-        break;
+        }
     }
-}
-            this.getLocalModel().collisionDetection(this);
+
+    @Override
+    public void paint(Graphics gr) {
+        if (getState() == src.tg.local.vo.VOState.DEAD) {
+            return;
+        }
+        super.paint(gr);
+
+        Graphics2D g2 = (Graphics2D) gr.create();
+        int x = (int) (getPosition().getX());
+        int y = (int) (getPosition().getY());
+
+        Polygon shipShape = new Polygon();
+        double r = SIZE / 2.0;
+
+        for (int i = 0; i < 3; ++i) {
+            double theta = Math.toRadians(angle + (i == 0 ? 0 : (i == 1 ? 135 : -135)));
+            int px = x + (int) (r * Math.cos(theta));
+            int py = y + (int) (r * Math.sin(theta));
+            shipShape.addPoint(px, py);
         }
 
-        try {
-            Thread.sleep(16);
-        } catch (InterruptedException ignore) {}
+        g2.setColor(Color.WHITE);
+        g2.fillPolygon(shipShape);
+        g2.setColor(Color.BLACK);
+        g2.drawPolygon(shipShape);
+
+        g2.dispose();
     }
-}
-
-@Override
-public void paint(Graphics gr) {
-    if (getState() == src.tg.local.vo.VOState.DEAD) {
-        return; // Don't paint if the ship is dead
-    }
-    super.paint(gr);
-
-    Graphics2D g2 = (Graphics2D) gr.create();
-    int x = (int) (getPosition().getX());
-    int y = (int) (getPosition().getY());
-
-    Polygon shipShape = new Polygon();
-    double r = SIZE / 2.0;
-
-    for (int i = 0; i < 3; ++i) {
-        double theta = Math.toRadians(angle + (i == 0 ? 0 : (i == 1 ? 135 : -135)));
-        int px = x + (int) (r * Math.cos(theta));
-        int py = y + (int) (r * Math.sin(theta));
-        shipShape.addPoint(px, py);
-    }
-
-    g2.setColor(Color.WHITE);
-    g2.fillPolygon(shipShape);
-    g2.setColor(Color.BLACK);
-    g2.drawPolygon(shipShape);
-
-    g2.dispose();
-}
 }
