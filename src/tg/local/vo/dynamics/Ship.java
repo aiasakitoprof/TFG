@@ -16,10 +16,11 @@ public class Ship extends VOD {
     private static final double ACCELERATION = 0.0005;
     private static final double ROTATION_SPEED = 0.22;
     private static final double MAX_SPEED = 0.5;
+    private boolean destroyByAsteroids = false;
 
-    private volatile boolean up, down, left, right;
-    private volatile double angle = 270;
-    private volatile boolean braking = false;
+    private boolean up, down, left, right;
+    private double angle = 270;
+    private boolean braking = true;
 
     private final int windowWidth = 1300;
     private final int windowHeight = 700;
@@ -175,6 +176,21 @@ public class Ship extends VOD {
                         break;
                     }
                 }
+                if (destroyByAsteroids) {
+                    for (Asteroid asteroid : this.getLocalModel().getAllAsteroids()) {
+                        double dx = asteroid.getPosition().getX() - pos.getX();
+                        double dy = asteroid.getPosition().getY() - pos.getY();
+                        double distance = Math.sqrt(dx * dx + dy * dy);
+
+                        double asteroidRadius = asteroid.getMainImage().getScaledImageDimension().getModule() / 2.0;
+                        double shipRadius = SIZE / 2.0;
+
+                        if (distance < asteroidRadius + shipRadius) {
+                            this.setState(VOState.DEAD);
+                            break;
+                        }
+                    }
+                }
                 this.getLocalModel().collisionDetection(this);
             }
 
@@ -211,11 +227,5 @@ public class Ship extends VOD {
         g2.drawPolygon(shipShape);
 
         g2.dispose();
-    }
-
-    private void stopShip() {
-        PhysicalVariables phyVars = this.getPhysicalModel().phyVariables;
-        phyVars.speed.setXY(0, 0);
-        phyVars.acceleration.setXY(0, 0);
     }
 }

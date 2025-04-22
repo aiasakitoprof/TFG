@@ -4,6 +4,7 @@ package src.tg.local;
 import src.tg.local.vo.VO;
 import src.tg.local.vo.VOD;
 import src.tg.local.vo.VOState;
+import src.tg.local.vo.dynamics.Asteroid;
 
 import java.util.ArrayList;
 
@@ -90,5 +91,15 @@ public class LM {
 
     synchronized ArrayList<VO> getVOList() {
         return (ArrayList) this.visualObjects.clone();
+    }
+
+    synchronized public ArrayList<Asteroid> getAllAsteroids() {
+        ArrayList<Asteroid> asteroids = new ArrayList<>();
+        for (VO vo : this.visualObjects) {
+            if (vo instanceof Asteroid) {
+                asteroids.add((Asteroid) vo);
+            }
+        }
+        return asteroids;
     }
 }
