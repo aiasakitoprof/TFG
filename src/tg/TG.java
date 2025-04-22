@@ -1,6 +1,5 @@
 package src.tg;
 
-
 import src.tg.fx.Spin;
 import src.tg.fx.SpinOverprint;
 import src.tg.fx.SpinOverprintType;
@@ -26,7 +25,6 @@ public class TG {
 
     private PCT peerController;
     private AsteroidGenerator vodGenerator;
-
 
     /**
      * CONSTRUCTORS
@@ -113,14 +111,6 @@ public class TG {
         planet.setAnimation(new SpinOverprint(SpinOverprintType.BUBBLE_1, 0.2d, 0.8d, 30, new DoubleVector(100, 0)));
         this.peerController.addVisualObject(planet);
     }
-
-    /**
-     * PUBLICS
-     */
-    public void addVisualObject(VO vo) {
-        this.peerController.addVisualObject(vo);
-    }
-
     private void setupRespawnKey() {
         java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(e -> {
             if (e.getID() == java.awt.event.KeyEvent.KEY_PRESSED && e.getKeyCode() == java.awt.event.KeyEvent.VK_SPACE) {
@@ -141,4 +131,10 @@ public class TG {
         });
     }
 
+    /**
+     * PUBLICS
+     */
+    public void addVisualObject(VO vo) {
+        this.peerController.addVisualObject(vo);
+    }
 }

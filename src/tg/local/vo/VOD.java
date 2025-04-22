@@ -87,7 +87,6 @@ public abstract class VOD extends VO implements Runnable {
         this.getLocalModel().collisionDetection(this);
     }
 
-
     /**
      * OVERRIDES
      */
@@ -119,12 +118,10 @@ public abstract class VOD extends VO implements Runnable {
         }
     }
 
-
     @Override
     synchronized public void paint(Graphics gr) {
         super.paint(gr);
 
         this.physicalModel.paint(gr, this.getPosition());
     }
-
 }

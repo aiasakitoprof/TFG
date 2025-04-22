@@ -19,7 +19,6 @@ public class Ship extends VOD {
     private static final double ACCELERATION = 0.0005;
     private static final double ROTATION_SPEED = 0.22;
     private static final double MAX_SPEED = 0.5;
-    private boolean destroyByAsteroids = false;
 
     private boolean up, down, left, right;
     private double angle = 270;
@@ -36,7 +35,7 @@ public class Ship extends VOD {
 
         this.shipImage = Images.loadImage("src/tg/images/assets/spaceship-5.png");
         if (shipImage != null) {
-            this.getMainImage().setImageAndDimension(shipImage); // Set the image as the main image for the ship
+            this.getMainImage().setImageAndDimension(shipImage);
         }
     }
 
@@ -172,35 +171,6 @@ public class Ship extends VOD {
                 if (bounced) {
                     phyVars.speed.scale(0.85);
                 }
-/*
-                for (Planet planet : Planet.getAllPlanets()) {
-                    double dx = planet.getPosition().getX() - pos.getX();
-                    double dy = planet.getPosition().getY() - pos.getY();
-                    double distance = Math.sqrt(dx * dx + dy * dy);
-
-                    double planetRadius = planet.getMainImage().getScaledImageDimension().getModule() / 2.0;
-                    double shipRadius = SIZE / 2.0;
-
-                    if (distance < planetRadius + shipRadius) {
-                        this.setState(VOState.DEAD);
-                        break;
-                    }
-                }
-                if (destroyByAsteroids) {
-                    for (Asteroid asteroid : this.getLocalModel().getAllAsteroids()) {
-                        double dx = asteroid.getPosition().getX() - pos.getX();
-                        double dy = asteroid.getPosition().getY() - pos.getY();
-                        double distance = Math.sqrt(dx * dx + dy * dy);
-
-                        double asteroidRadius = asteroid.getMainImage().getScaledImageDimension().getModule() / 2.0;
-                        double shipRadius = SIZE / 2.0;
-
-                        if (distance < asteroidRadius + shipRadius) {
-                            this.setState(VOState.DEAD);
-                            break;
-                        }
-                    }
-                }*/
                 this.getLocalModel().collisionDetection(this);
             }
 
@@ -215,28 +185,22 @@ public class Ship extends VOD {
         if (getState() == VOState.DEAD) {
             return;
         }
-
         Graphics2D g2 = (Graphics2D) gr.create();
         int x = (int) (getPosition().getX());
         int y = (int) (getPosition().getY());
 
-        // Draw the ship's image if it's loaded
         if (shipImage != null) {
             int imageWidth = shipImage.getWidth();
             int imageHeight = shipImage.getHeight();
 
-            // Rotate the image based on the ship's angle
             AffineTransform transform = AffineTransform.getRotateInstance(
                     Math.toRadians(angle), x, y
             );
-
             g2.setTransform(transform);
             g2.drawImage(shipImage, x - imageWidth / 2, y - imageHeight / 2, null);
         } else {
-            // Fallback to draw the polygon if the image is unavailable
             super.paint(gr);
         }
-
         g2.dispose();
     }
 }
