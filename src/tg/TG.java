@@ -10,7 +10,6 @@ import src.tg.images.Images;
 import src.tg.local.vo.VO;
 import src.tg.local.vo.dynamics.Planet;
 import src.tg.local.vo.dynamics.Ship;
-import src.tg.local.vo.VOState;
 import src.tg.peer.PCT;
 
 import java.util.Random;
@@ -43,7 +42,7 @@ public class TG {
         this.vodGenerator.activate();
         this.addPlanets();
 
-        Ship ship = new Ship(new DoubleVector(100, 100));
+        Ship ship = new Ship(new DoubleVector(100, 600));
         this.peerController.addVisualObject(ship);
         setupRespawnKey();
     }
@@ -132,7 +131,7 @@ public class TG {
                     }
                 }
                 if (!aliveShipExists) {
-                    Ship newShip = new Ship(new DoubleVector(100, 100)); // Or wherever you want to spawn
+                    Ship newShip = new Ship(new DoubleVector(100, 600));
                     this.peerController.addVisualObject(newShip);
                 }
             }

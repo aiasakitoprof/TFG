@@ -3,6 +3,7 @@ package src.tg.local.vo.dynamics;
 import src.tg.helper.DoubleVector;
 import src.tg.helper.Position;
 import src.tg.local.vo.VOD;
+import src.tg.local.vo.VOState;
 import src.tg.physics.PhysicalVariables;
 
 import javax.swing.*;
@@ -18,6 +19,7 @@ public class Ship extends VOD {
 
     private volatile boolean up, down, left, right;
     private volatile double angle = 270;
+    private volatile boolean braking = false;
 
     private final int windowWidth = 1300;
     private final int windowHeight = 700;
@@ -37,6 +39,7 @@ public class Ship extends VOD {
                         case KeyEvent.VK_S -> down = pressed;
                         case KeyEvent.VK_A -> left = pressed;
                         case KeyEvent.VK_D -> right = pressed;
+                        case KeyEvent.VK_Q -> braking = pressed;
                     }
                 }
                 return false;
@@ -60,24 +63,60 @@ public class Ship extends VOD {
                 if (left) angle -= ROTATION_SPEED * elapsed;
                 if (right) angle += ROTATION_SPEED * elapsed;
 
-                DoubleVector acc = new DoubleVector(0, 0);
+                DoubleVector userAcc = new DoubleVector(0, 0);
                 if (up) {
-                    acc.setXY(
+                    userAcc.setXY(
                             Math.cos(Math.toRadians(angle)),
                             Math.sin(Math.toRadians(angle))
                     );
-                    acc.scale(ACCELERATION);
+                    userAcc.scale(ACCELERATION);
                 }
                 if (down) {
-                    acc.setXY(
+                    userAcc.setXY(
                             Math.cos(Math.toRadians(angle + 180)),
                             Math.sin(Math.toRadians(angle + 180))
                     );
-                    acc.scale(ACCELERATION);
+                    userAcc.scale(ACCELERATION);
+                }
+
+                DoubleVector gravAccel = new DoubleVector(0, 0);
+                double G = 3e-11;
+                DoubleVector shipPos = new DoubleVector(pos);
+                for (Planet planet : Planet.getAllPlanets()) {
+                    DoubleVector planetPos = planet.getPosition();
+                    double dx = planetPos.getX() - shipPos.getX();
+                    double dy = planetPos.getY() - shipPos.getY();
+                    double r2 = dx * dx + dy * dy;
+                    double distance = Math.sqrt(r2);
+
+                    if (distance < 1) distance = 1;
+
+                    double forceMagnitude = G * planet.getMass() / (distance * distance);
+                    double ax = forceMagnitude * dx / distance;
+                    double ay = forceMagnitude * dy / distance;
+                    gravAccel.setXY(gravAccel.getX() + ax, gravAccel.getY() + ay);
+                }
+
+                DoubleVector totalAccel = new DoubleVector(userAcc);
+                totalAccel.add(gravAccel);
+
+                if (braking) {
+                    final double BRAKE_STRENGTH = 0.0005;
+
+                    DoubleVector brakeAccel = new DoubleVector(phyVars.speed);
+                    if (brakeAccel.getModule() > 0) {
+                        brakeAccel.scale(-1);
+                        double speedMag = phyVars.speed.getModule();
+                        double brakeMag = Math.min(BRAKE_STRENGTH, speedMag / (elapsed > 0 ? elapsed : 1));
+                        if (speedMag > 0) {
+                            brakeAccel.scale(brakeMag / speedMag);
+                            totalAccel.add(brakeAccel);
+                        }
+                    }
                 }
 
                 DoubleVector speed = new DoubleVector(phyVars.speed);
-                DoubleVector speedIncrement = new DoubleVector(acc);
+                DoubleVector speedIncrement = new DoubleVector(totalAccel);
                 speedIncrement.scale(elapsed);
                 speed.add(speedIncrement);
 
@@ -87,7 +126,7 @@ public class Ship extends VOD {
                 }
 
                 phyVars.speed.set(speed);
-                phyVars.acceleration.set(acc);
+                phyVars.acceleration.set(totalAccel);
 
                 DoubleVector offset = new DoubleVector(speed);
                 offset.scale(elapsed);
@@ -99,7 +138,6 @@ public class Ship extends VOD {
                 double halfSize = SIZE / 2.0;
 
                 boolean bounced = false;
-
                 if (x - halfSize < 0) {
                     pos.setX(halfSize);
                     phyVars.speed.setX(-phyVars.speed.getX());
@@ -120,7 +158,6 @@ public class Ship extends VOD {
                     phyVars.speed.setY(-phyVars.speed.getY());
                     bounced = true;
                 }
-
                 if (bounced) {
                     phyVars.speed.scale(0.85);
                 }
@@ -134,7 +171,7 @@ public class Ship extends VOD {
                     double shipRadius = SIZE / 2.0;
 
                     if (distance < planetRadius + shipRadius) {
-                        this.setState(src.tg.local.vo.VOState.DEAD);
+                        this.setState(VOState.DEAD);
                         break;
                     }
                 }
@@ -143,14 +180,13 @@ public class Ship extends VOD {
 
             try {
                 Thread.sleep(16);
-            } catch (InterruptedException ignore) {
-            }
+            } catch (InterruptedException ignore) {}
         }
     }
 
     @Override
     public void paint(Graphics gr) {
-        if (getState() == src.tg.local.vo.VOState.DEAD) {
+        if (getState() == VOState.DEAD) {
             return;
         }
         super.paint(gr);
@@ -175,5 +211,11 @@ public class Ship extends VOD {
         g2.drawPolygon(shipShape);
 
         g2.dispose();
+    }
+
+    private void stopShip() {
+        PhysicalVariables phyVars = this.getPhysicalModel().phyVariables;
+        phyVars.speed.setXY(0, 0);
+        phyVars.acceleration.setXY(0, 0);
     }
 }

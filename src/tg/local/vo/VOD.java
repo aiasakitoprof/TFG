@@ -105,7 +105,6 @@ public abstract class VOD extends VO implements Runnable {
         while (this.getState() != VOState.DEAD) {
 
             if (this.getState() == VOState.ALIVE) {
-                // Try to move
                 newPos.clone(this.getPosition());
                 this.physicalModel.calcNewLocationGravity(newPos, newPhyVar);
                 this.nextMove(newPos, newPhyVar);
