@@ -5,10 +5,13 @@ import src.tg.helper.Position;
 import src.tg.local.vo.VOD;
 import src.tg.local.vo.VOState;
 import src.tg.physics.PhysicalVariables;
+import src.tg.images.Images;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 public class Ship extends VOD {
 
@@ -20,14 +23,21 @@ public class Ship extends VOD {
 
     private boolean up, down, left, right;
     private double angle = 270;
-    private boolean braking = true;
+    private boolean braking = false;
 
     private final int windowWidth = 1300;
     private final int windowHeight = 700;
 
+    private final BufferedImage shipImage;
+
     public Ship(DoubleVector startPos) {
         this.getPosition().setXY(startPos.getX(), startPos.getY());
         setupKeyBindings();
+
+        this.shipImage = Images.loadImage("src/tg/images/assets/spaceship-5.png");
+        if (shipImage != null) {
+            this.getMainImage().setImageAndDimension(shipImage); // Set the image as the main image for the ship
+        }
     }
 
     private void setupKeyBindings() {
@@ -162,7 +172,7 @@ public class Ship extends VOD {
                 if (bounced) {
                     phyVars.speed.scale(0.85);
                 }
-
+/*
                 for (Planet planet : Planet.getAllPlanets()) {
                     double dx = planet.getPosition().getX() - pos.getX();
                     double dy = planet.getPosition().getY() - pos.getY();
@@ -190,7 +200,7 @@ public class Ship extends VOD {
                             break;
                         }
                     }
-                }
+                }*/
                 this.getLocalModel().collisionDetection(this);
             }
 
@@ -205,26 +215,27 @@ public class Ship extends VOD {
         if (getState() == VOState.DEAD) {
             return;
         }
-        super.paint(gr);
 
         Graphics2D g2 = (Graphics2D) gr.create();
         int x = (int) (getPosition().getX());
         int y = (int) (getPosition().getY());
 
-        Polygon shipShape = new Polygon();
-        double r = SIZE / 2.0;
+        // Draw the ship's image if it's loaded
+        if (shipImage != null) {
+            int imageWidth = shipImage.getWidth();
+            int imageHeight = shipImage.getHeight();
 
-        for (int i = 0; i < 3; ++i) {
-            double theta = Math.toRadians(angle + (i == 0 ? 0 : (i == 1 ? 135 : -135)));
-            int px = x + (int) (r * Math.cos(theta));
-            int py = y + (int) (r * Math.sin(theta));
-            shipShape.addPoint(px, py);
+            // Rotate the image based on the ship's angle
+            AffineTransform transform = AffineTransform.getRotateInstance(
+                    Math.toRadians(angle), x, y
+            );
+
+            g2.setTransform(transform);
+            g2.drawImage(shipImage, x - imageWidth / 2, y - imageHeight / 2, null);
+        } else {
+            // Fallback to draw the polygon if the image is unavailable
+            super.paint(gr);
         }
-
-        g2.setColor(Color.WHITE);
-        g2.fillPolygon(shipShape);
-        g2.setColor(Color.BLACK);
-        g2.drawPolygon(shipShape);
 
         g2.dispose();
     }

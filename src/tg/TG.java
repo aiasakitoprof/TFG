@@ -43,6 +43,7 @@ public class TG {
         this.addPlanets();
 
         Ship ship = new Ship(new DoubleVector(100, 600));
+        ship.activate();
         this.peerController.addVisualObject(ship);
         setupRespawnKey();
     }
@@ -132,6 +133,7 @@ public class TG {
                 }
                 if (!aliveShipExists) {
                     Ship newShip = new Ship(new DoubleVector(100, 600));
+                    newShip.activate();
                     this.peerController.addVisualObject(newShip);
                 }
             }

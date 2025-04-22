@@ -197,7 +197,7 @@ public class Images {
     }
 
 
-    private static BufferedImage loadImage(String fileName) {
+    public static BufferedImage loadImage(String fileName) {
         BufferedImage img;
 
         img = null;
