@@ -74,7 +74,7 @@ public class TG {
         Planet planet;
 
         // Planeta 1
-        planet = new Planet(1, 0.25d, new DoubleVector(200, 200), 10e10d);
+        planet = new Planet(1, 0.25d, new DoubleVector(200, 200), 10e9d);
         planet.setAnimation(new Spin(0.8d, 1));
         //planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_1, 1.05d, 0.2d, 30));
         //planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_1, 1d, -0.15d, 30));
@@ -82,7 +82,7 @@ public class TG {
         this.peerController.addVisualObject(planet);
 
         // Planeta 2
-        planet = new Planet(2, 0.3d, new DoubleVector(325, 225), 10e10d);
+        planet = new Planet(2, 0.3d, new DoubleVector(325, 225), 10e9d);
         planet.setAnimation(new Spin(0.15d, 30));
         planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_7, 0.25d, -0.9d, 30, new DoubleVector(70, 0)));
         //planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_10, 0.4d, -0.3d, 30));
@@ -99,12 +99,12 @@ public class TG {
         //planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_4, 0.7d, 0.5d, 30));
         //this.peerController.addVisualObject(planet);
         // Planeta 6
-        planet = new Planet(5, 0.25d, new DoubleVector(700, 400), 10e10d);
+        planet = new Planet(5, 0.25d, new DoubleVector(700, 400), 10e9d);
         planet.setAnimation(new Spin(2d, 30));
         planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_5, 0.3d, -2.2d, 30));
         this.peerController.addVisualObject(planet);
         // Planeta 7
-        planet = new Planet(6, 0.5d, new DoubleVector(1000, 400), 10e10d);
+        planet = new Planet(6, 0.5d, new DoubleVector(1000, 400), 10e9d);
         planet.setAnimation(new Spin(-0.2d, 30));
         planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_6, 0.65d, 0.2d, 30));
         planet.setAnimation(new SpinOverprint(SpinOverprintType.HALO_9, 0.9d, 0.25d, 30, new DoubleVector(-100, -10)));

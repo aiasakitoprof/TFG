@@ -90,7 +90,7 @@ public class Ship extends VOD {
                 }
 
                 DoubleVector gravAccel = new DoubleVector(0, 0);
-                double G = 3e-11;
+                double G = 6 * 10e-11;
                 DoubleVector shipPos = new DoubleVector(pos);
                 for (Planet planet : Planet.getAllPlanets()) {
                     DoubleVector planetPos = planet.getPosition();
