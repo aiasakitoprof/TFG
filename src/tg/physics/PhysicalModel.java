@@ -66,14 +66,12 @@ public class PhysicalModel implements Serializable {
     }
 
     public void calcNewLocationGravity(Position pos, PhysicalVariables phyVar) {
+        DoubleVector objectPos = new DoubleVector(pos);
         DoubleVector gravAccel = new DoubleVector(0, 0);
+        double G = 6e-11;
 
         phyVar.cloneSpeed(this.phyVariables.speed);
         phyVar.cloneAcceleration(this.phyVariables.acceleration);
-
-        double G = 6e-11;
-
-        DoubleVector objectPos = new DoubleVector(pos);
 
         for (Planet planet : Planet.getAllPlanets()) {
             DoubleVector planetPos = planet.getPosition();
