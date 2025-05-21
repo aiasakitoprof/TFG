@@ -33,4 +33,4 @@ A mitad del archivo TG.java y remarcado con un //TODO: se encuentra el main dond
 ---
 # Under Construction
 
-Remarcar que el proyecto de momento sigue en evolución y sujeto a cambios. Para revisar todos los cambios que se hayan publicado por el momento se puede revisar el [historial de cambios](https://github.com/aiasakitoprof/TFG/commits/main).
+Remarcar que el proyecto de momento sigue en evolución y sujeto a cambios. Para revisar todos los cambios que se hayan publicado por el momento se puede revisar el [historial de cambios](https://github.com/aiasakitoprof/TFG/commits/main). 
